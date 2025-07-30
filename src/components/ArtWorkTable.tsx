@@ -5,12 +5,14 @@ import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { Paginator } from "primereact/paginator";
 import { OverlayPanel } from "primereact/overlaypanel";
+import "primeicons/primeicons.css";
 
 const ArtWorkTable = () => {
   const [artWorkData, setArtWorkData] = useState<any[]>([]);
   const [totalRecordsData, setTotalRecordsData] = useState(0);
   const [pageCount, setPageCount] = useState(0);
   const [selectedAtWork, setSelectedAtWork] = useState([]);
+  const op = useRef<OverlayPanel>(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -45,11 +47,28 @@ const ArtWorkTable = () => {
     updatedSelectedAtWork = updatedSelectedAtWork.filter(
       (row) => !artWorkIds.includes(row.id) // Removing previously selected rows from current page data, because they might be deselected
     );
+
     e.value.forEach((obj) => {
       updatedSelectedAtWork.push(obj); // adding current page selected rows
     });
+
     setSelectedAtWork(updatedSelectedAtWork); // Finally updating  state with the selectedArtWork data
   };
+
+  const isOverlayPanelOpen = (e: React.MouseEvent) => {
+    op.current?.toggle(e);
+    console.log("on clicked", op);
+  };
+  
+  const downArrowIcon = (
+    <div className="flex items-center">
+      <i
+        className="pi pi-chevron-down"
+        onClick={(e) => isOverlayPanelOpen(e)}
+        style={{ cursor: "pointer" }}
+      />
+    </div>
+  );
 
   return (
     <div className="card">
@@ -65,10 +84,14 @@ const ArtWorkTable = () => {
           selectionMode="multiple"
           headerStyle={{ width: "3rem" }}
         ></Column>
+        <Column header={downArrowIcon} headerStyle={{ width: "4rem" }} />
         {TableColumns.map((col) => (
           <Column field={col.field} header={col.header}></Column>
         ))}
       </DataTable>
+      <OverlayPanel ref={op}>
+        <span>overlay</span>
+      </OverlayPanel>
       <Paginator
         first={pageCount * 12}
         rows={12}

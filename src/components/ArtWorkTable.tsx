@@ -1,15 +1,16 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import axios from "axios";
 
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { Paginator } from "primereact/paginator";
+import { OverlayPanel } from "primereact/overlaypanel";
 
 const ArtWorkTable = () => {
   const [artWorkData, setArtWorkData] = useState<any[]>([]);
   const [totalRecordsData, setTotalRecordsData] = useState(0);
   const [pageCount, setPageCount] = useState(0);
-  const [selectedAtWork, setSelectedAtWork] = useState({});
+  const [selectedAtWork, setSelectedAtWork] = useState([]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -19,7 +20,6 @@ const ArtWorkTable = () => {
         );
         setArtWorkData(res.data.data);
         setTotalRecordsData(res.data.pagination.total);
-        console.log("res.data---", res.data);
       } catch (err) {
         console.error("Error loading data:", err);
       }
@@ -36,12 +36,21 @@ const ArtWorkTable = () => {
     { field: "date_start", header: "Date Start" },
     { field: "date_end", header: "Date End" },
   ];
-  console.log("artWorkData", artWorkData, pageCount);
 
   const handleSelectedAtWork = (e) => {
-    console.log(e, "selectedAtWork");
-    setSelectedAtWork(e.value);
+    let updatedSelectedAtWork = [...selectedAtWork]; //copy of previously selected rows data
+
+    const artWorkIds = artWorkData.map((row) => row.id); // current page row ids
+
+    updatedSelectedAtWork = updatedSelectedAtWork.filter(
+      (row) => !artWorkIds.includes(row.id) // Removing previously selected rows from current page data, because they might be deselected
+    );
+    e.value.forEach((obj) => {
+      updatedSelectedAtWork.push(obj); // adding current page selected rows
+    });
+    setSelectedAtWork(updatedSelectedAtWork); // Finally updating  state with the selectedArtWork data
   };
+
   return (
     <div className="card">
       <DataTable

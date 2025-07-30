@@ -1,6 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
 import axios from "axios";
-
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { Paginator } from "primereact/paginator";
@@ -75,32 +74,32 @@ const ArtWorkTable = () => {
 
   const getSelectedRowsData = async (targetValue: any) => {
     try {
-      let currentPage = 0;
-      let allRowsData: any[] = [];
-      while (allRowsData.length < targetValue) {
+      const targetPageCount = Math.ceil(targetValue / 12); //calculated targeted page count
+      let targetedRowsData: any[] = [];
+      for (let currentPage = 1; currentPage <= targetPageCount; currentPage++) {
         const res = await axios.get(
-          `https://api.artic.edu/api/v1/artworks?page=${1 + currentPage}`
+          `https://api.artic.edu/api/v1/artworks?page=${currentPage}`
         );
         const rowsData = res.data.data;
-        console.log(" res.data.data", res.data.data);
-        allRowsData = [...allRowsData, ...rowsData];
-        console.log(" allRowsData", allRowsData);
-        currentPage++;
+        const pendingrows = targetValue - targetedRowsData.length; // getting pending row count
+        targetedRowsData.push(...rowsData.slice(0, pendingrows)); // pushing required rows data from current page
+        console.log("targetedRowsData", targetedRowsData);
+
+        if (targetedRowsData.length >= targetValue) break; // breaking the loop when we have target rows data
       }
-      const allSelectedRowsData = allRowsData.slice(0, targetValue);
-      console.log("allSelectedRowsData---------", allSelectedRowsData);
-      return setSelectedAtWork(allSelectedRowsData);
+
+      console.log("targetedRowsData---------", targetedRowsData);
+      return setSelectedAtWork(targetedRowsData); // Finally updating state of selected artWork data
     } catch (err) {
       console.error("Error loading data:", err);
-      return [];
     }
   };
 
   const selectedRows = async () => {
     console.log("getSelectedRowsData:", numberValue);
     await getSelectedRowsData(numberValue);
-    op.current?.hide();
-    setNumberValue(null); // hide the panel after submit
+    op.current?.hide(); // hide the panel after submit
+    setNumberValue(null);  // after submit updating value to null
   };
 
   return (
@@ -115,11 +114,14 @@ const ArtWorkTable = () => {
       >
         <Column
           selectionMode="multiple"
-          headerStyle={{ width: "3rem" }}
-        ></Column>
-        <Column header={downArrowIcon} headerStyle={{ width: "4rem" }} />
+          headerClassName="ml-2"
+        />
+        <Column
+          header={downArrowIcon}
+          headerStyle={{ width: "2rem" }}
+        />
         {TableColumns.map((col) => (
-          <Column field={col.field} header={col.header}></Column>
+          <Column field={col.field} header={col.header} />
         ))}
       </DataTable>
       <OverlayPanel
@@ -138,15 +140,12 @@ const ArtWorkTable = () => {
             onValueChange={(e) => setNumberValue(e.value)}
             useGrouping={false}
             placeholder="Select Rows"
-            className="w-full"
-            inputClassName="w-full px-3 py-2 border rounded h-10"
           />
 
-          <div style={{ marginTop: '10px', marginRight:'0px' }}>
+          <div>
             <Button
               label="Submit"
               onClick={selectedRows}
-              className="h-1 px-4 text-sm"
             />
           </div>
         </div>

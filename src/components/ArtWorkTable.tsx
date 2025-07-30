@@ -6,6 +6,8 @@ import { Column } from "primereact/column";
 import { Paginator } from "primereact/paginator";
 import { OverlayPanel } from "primereact/overlaypanel";
 import "primeicons/primeicons.css";
+import { Button } from "primereact/button";
+import { InputNumber } from "primereact/inputnumber";
 
 const ArtWorkTable = () => {
   const [artWorkData, setArtWorkData] = useState<any[]>([]);
@@ -13,6 +15,7 @@ const ArtWorkTable = () => {
   const [pageCount, setPageCount] = useState(0);
   const [selectedAtWork, setSelectedAtWork] = useState([]);
   const op = useRef<OverlayPanel>(null);
+  const [numberValue, setNumberValue] = useState<number | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -56,10 +59,10 @@ const ArtWorkTable = () => {
   };
 
   const isOverlayPanelOpen = (e: React.MouseEvent) => {
-    op.current?.toggle(e);
+    op.current?.toggle(e); // open the panel
     console.log("on clicked", op);
   };
-  
+
   const downArrowIcon = (
     <div className="flex items-center">
       <i
@@ -69,6 +72,36 @@ const ArtWorkTable = () => {
       />
     </div>
   );
+
+  const getSelectedRowsData = async (targetValue: any) => {
+    try {
+      let currentPage = 0;
+      let allRowsData: any[] = [];
+      while (allRowsData.length < targetValue) {
+        const res = await axios.get(
+          `https://api.artic.edu/api/v1/artworks?page=${1 + currentPage}`
+        );
+        const rowsData = res.data.data;
+        console.log(" res.data.data", res.data.data);
+        allRowsData = [...allRowsData, ...rowsData];
+        console.log(" allRowsData", allRowsData);
+        currentPage++;
+      }
+      const allSelectedRowsData = allRowsData.slice(0, targetValue);
+      console.log("allSelectedRowsData---------", allSelectedRowsData);
+      return setSelectedAtWork(allSelectedRowsData);
+    } catch (err) {
+      console.error("Error loading data:", err);
+      return [];
+    }
+  };
+
+  const selectedRows = async () => {
+    console.log("getSelectedRowsData:", numberValue);
+    await getSelectedRowsData(numberValue);
+    op.current?.hide();
+    setNumberValue(null); // hide the panel after submit
+  };
 
   return (
     <div className="card">
@@ -89,9 +122,36 @@ const ArtWorkTable = () => {
           <Column field={col.field} header={col.header}></Column>
         ))}
       </DataTable>
-      <OverlayPanel ref={op}>
-        <span>overlay</span>
+      <OverlayPanel
+        ref={op}
+        style={{
+          backgroundColor: "#ffffff",
+          borderRadius: "8px",
+          boxShadow: "0 8px 24px rgba(0, 0, 0, 0.2)",
+          padding: "16px",
+          margin: "8px",
+        }}
+      >
+        <div className="flex flex-col gap-3 w-64">
+          <InputNumber
+            value={numberValue}
+            onValueChange={(e) => setNumberValue(e.value)}
+            useGrouping={false}
+            placeholder="Select Rows"
+            className="w-full"
+            inputClassName="w-full px-3 py-2 border rounded h-10"
+          />
+
+          <div style={{ marginTop: '10px', marginRight:'0px' }}>
+            <Button
+              label="Submit"
+              onClick={selectedRows}
+              className="h-1 px-4 text-sm"
+            />
+          </div>
+        </div>
       </OverlayPanel>
+
       <Paginator
         first={pageCount * 12}
         rows={12}

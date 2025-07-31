@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from "react";
 import axios from "axios";
-import { DataTable } from "primereact/datatable";
+import { DataTable, type DataTableSelectionMultipleChangeEvent } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { Paginator } from "primereact/paginator";
 import { OverlayPanel } from "primereact/overlaypanel";
@@ -41,7 +41,7 @@ const ArtWorkTable = () => {
     { field: "date_end", header: "Date End" },
   ];
 
-  const handleSelectedAtWork = (e) => {
+  const handleSelectedAtWork = (e: DataTableSelectionMultipleChangeEvent) => {
     let updatedSelectedAtWork = [...selectedAtWork]; //copy of previously selected rows data
 
     const artWorkIds = artWorkData.map((row) => row.id); // current page row ids
@@ -59,7 +59,6 @@ const ArtWorkTable = () => {
 
   const isOverlayPanelOpen = (e: React.MouseEvent) => {
     op.current?.toggle(e); // open the panel
-    console.log("on clicked", op);
   };
 
   const downArrowIcon = (
@@ -83,12 +82,9 @@ const ArtWorkTable = () => {
         const rowsData = res.data.data;
         const pendingrows = targetValue - targetedRowsData.length; // getting pending row count
         targetedRowsData.push(...rowsData.slice(0, pendingrows)); // pushing required rows data from current page
-        console.log("targetedRowsData", targetedRowsData);
 
         if (targetedRowsData.length >= targetValue) break; // breaking the loop when we have target rows data
       }
-
-      console.log("targetedRowsData---------", targetedRowsData);
       return setSelectedAtWork(targetedRowsData); // Finally updating state of selected artWork data
     } catch (err) {
       console.error("Error loading data:", err);
@@ -96,10 +92,9 @@ const ArtWorkTable = () => {
   };
 
   const selectedRows = async () => {
-    console.log("getSelectedRowsData:", numberValue);
     await getSelectedRowsData(numberValue);
     op.current?.hide(); // hide the panel after submit
-    setNumberValue(null);  // after submit updating value to null
+    setNumberValue(null); // after submit updating value to null
   };
 
   return (
@@ -112,14 +107,8 @@ const ArtWorkTable = () => {
         dataKey="id"
         tableStyle={{ minWidth: "50rem" }}
       >
-        <Column
-          selectionMode="multiple"
-          headerClassName="ml-2"
-        />
-        <Column
-          header={downArrowIcon}
-          headerStyle={{ width: "2rem" }}
-        />
+        <Column selectionMode="multiple" headerClassName="ml-2" />
+        <Column header={downArrowIcon} headerStyle={{ width: "2rem" }} />
         {TableColumns.map((col) => (
           <Column field={col.field} header={col.header} />
         ))}
@@ -143,10 +132,7 @@ const ArtWorkTable = () => {
           />
 
           <div>
-            <Button
-              label="Submit"
-              onClick={selectedRows}
-            />
+            <Button label="Submit" onClick={selectedRows} />
           </div>
         </div>
       </OverlayPanel>

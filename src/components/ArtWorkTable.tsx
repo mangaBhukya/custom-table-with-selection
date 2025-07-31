@@ -34,7 +34,6 @@ const ArtWorkTable = () => {
         );
         setArtWorkData(res.data.data);
         setTotalRecordsData(res.data.pagination.total);
-        console.log('res.data.data--------', res.data.data)
       } catch (err) {
         console.error("Error loading data:", err);
       }
@@ -53,7 +52,6 @@ const ArtWorkTable = () => {
   ];
 
   const handleSelectedAtWork = (e:  DataTableSelectionMultipleChangeEvent<ArtWork[]>) => {
-    console.log(e, 'e')
     let updatedSelectedAtWork = [...selectedAtWork]; //copy of previously selected rows data
 
     const artWorkIds = artWorkData.map((row) => row.id); // current page row ids

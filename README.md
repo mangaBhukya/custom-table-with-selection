@@ -1,69 +1,54 @@
-# React + TypeScript + Vite
+# Paginated Table - Customized Row Selection (Vite + React + PrimeReact)
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A simple and clean React application using **Vite**, **TypeScript**, and **PrimeReact** to render a paginated table that supports row selection across pages.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- Built with Vite for fast development
+- Data fetched from a paginated API (Art Institute of Chicago API used as example)
+- Select rows across multiple pages
+- Input-based row fetch using OverlayPanel (e.g., fetch exactly 15 rows)
+- Styled with Tailwind CSS + PrimeReact components
+- Efficient memory usage — doesn't load full dataset
 
-## Expanding the ESLint configuration
+## Tech Stack
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+- **React + TypeScript**
+- **Vite**
+- **PrimeReact** (DataTable, OverlayPanel, Button, InputNumber)
+- **Tailwind CSS**
+- **Axios** for API calls
 
-```js
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+## Getting Started
 
-      // Remove tseslint.configs.recommended and replace with this
-      ...tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      ...tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      ...tseslint.configs.stylisticTypeChecked,
+### 1. Clone the repository
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+git clone https://github.com/mangaBhukya/custom-table-with-selection.git
+cd custom-table-with-selection
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+### 2. nstall dependencies
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm install
 ```
+
+### 3. Start the development server
+
+```bash
+npm run dev
+```
+
+The app will be running at http://localhost:5173.
+
+## How It Works
+
+- Uses DataTable from PrimeReact with server-side pagination.
+- Maintains selected rows across multiple pages using custom logic.
+
+  - Updates selected rows across pages by removing old ones from the current page and adding new selections.
+  - Helps keep only the latest selected rows from all pages together.
+
+- An OverlayPanel lets you enter a number, then fetches only that many rows page by page from the API.
+- Avoids full dataset storage by slicing results per user input.

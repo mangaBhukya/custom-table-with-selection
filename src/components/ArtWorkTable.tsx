@@ -8,11 +8,21 @@ import "primeicons/primeicons.css";
 import { Button } from "primereact/button";
 import { InputNumber } from "primereact/inputnumber";
 
+interface ArtWork {
+  id: number;
+  title: string;
+  place_of_origin: string;
+  artist_display: string;
+  inscriptions: string;
+  date_start: Date;
+  date_end: Date;
+}
+
 const ArtWorkTable = () => {
-  const [artWorkData, setArtWorkData] = useState<any[]>([]);
+  const [artWorkData, setArtWorkData] = useState<ArtWork[]>([]);
   const [totalRecordsData, setTotalRecordsData] = useState(0);
   const [pageCount, setPageCount] = useState(0);
-  const [selectedAtWork, setSelectedAtWork] = useState([]);
+  const [selectedAtWork, setSelectedAtWork] = useState<ArtWork[]>([]);
   const op = useRef<OverlayPanel>(null);
   const [numberValue, setNumberValue] = useState<number | null>(null);
 
@@ -24,6 +34,7 @@ const ArtWorkTable = () => {
         );
         setArtWorkData(res.data.data);
         setTotalRecordsData(res.data.pagination.total);
+        console.log('res.data.data--------', res.data.data)
       } catch (err) {
         console.error("Error loading data:", err);
       }
@@ -41,7 +52,8 @@ const ArtWorkTable = () => {
     { field: "date_end", header: "Date End" },
   ];
 
-  const handleSelectedAtWork = (e: DataTableSelectionMultipleChangeEvent) => {
+  const handleSelectedAtWork = (e:  DataTableSelectionMultipleChangeEvent<ArtWork[]>) => {
+    console.log(e, 'e')
     let updatedSelectedAtWork = [...selectedAtWork]; //copy of previously selected rows data
 
     const artWorkIds = artWorkData.map((row) => row.id); // current page row ids
@@ -50,7 +62,7 @@ const ArtWorkTable = () => {
       (row) => !artWorkIds.includes(row.id) // Removing previously selected rows from current page data, because they might be deselected
     );
 
-    e.value.forEach((obj) => {
+    e.value.forEach((obj: ArtWork) => {
       updatedSelectedAtWork.push(obj); // adding current page selected rows
     });
 
@@ -71,10 +83,10 @@ const ArtWorkTable = () => {
     </div>
   );
 
-  const getSelectedRowsData = async (targetValue: any) => {
+  const getSelectedRowsData = async (targetValue: number) => {
     try {
       const targetPageCount = Math.ceil(targetValue / 12); //calculated targeted page count
-      let targetedRowsData: any[] = [];
+      const  targetedRowsData: ArtWork[] = [];
       for (let currentPage = 1; currentPage <= targetPageCount; currentPage++) {
         const res = await axios.get(
           `https://api.artic.edu/api/v1/artworks?page=${currentPage}`
@@ -92,6 +104,7 @@ const ArtWorkTable = () => {
   };
 
   const selectedRows = async () => {
+    if (!numberValue || numberValue <= 0) return;
     await getSelectedRowsData(numberValue);
     op.current?.hide(); // hide the panel after submit
     setNumberValue(null); // after submit updating value to null
@@ -126,7 +139,7 @@ const ArtWorkTable = () => {
         <div className="flex flex-col gap-3 w-64">
           <InputNumber
             value={numberValue}
-            onValueChange={(e) => setNumberValue(e.value)}
+            onValueChange={(e) => setNumberValue(e.value ?? null)}
             useGrouping={false}
             placeholder="Select Rows"
           />
